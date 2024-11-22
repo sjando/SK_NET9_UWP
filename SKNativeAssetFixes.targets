@@ -1,0 +1,33 @@
+<Project>
+  <Target Name="FixNativeAssets_Build" AfterTargets="Build">
+    <PropertyGroup>
+      <RecipeFile>$(OutputPath)$(ProjectName).build.appxrecipe</RecipeFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <UWPNativeAssets Include="$(NuGetPackageRoot)stereokit/0.3.9/runtimes/win10-$(Platform)/nativeassets/uap10.0/**/*.*" />
+    </ItemGroup>
+    <Message Importance="High" Text="Replacing StereoKit native Windows assets with UWP versions (build)" />
+    <!-- Overwrite 'standard' StereoKitC files with UWP versions in output directory (not sure this is ever actually used) -->
+    <Copy SourceFiles="@(UWPNativeAssets)" DestinationFolder="$(OutputPath)%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <!-- Ensure UWP versions are also listed in appx recipe file (this controls what ends up in the package when running from VS, which is what matters) -->
+    <!-- Should be able to do this by manipulating AppxPackagePayload (as below) but Microsoft.Windows.SDK.BuildTools.MSIX.Packaging.targetsEnsure @ 1.0.20241009.2 is bugged, see Microsoft.Windows.SDK.BuildTools.MSIX.Packaging.targets lines 1615 & 1620 -->
+    <WriteLinesToFile File="$(RecipeFile)" Lines="$([System.IO.File]::ReadAllText($(RecipeFile)).Replace('win-$(Platform)\native\StereoKitC.dll', 'win10-$(Platform)\nativeassets\uap10.0\StereoKitC.dll'))" Overwrite="true" Encoding="Unicode" />
+  </Target>
+
+  <!-- Overwrite 'standard' StereoKitC files with UWP versions in publish directory (not sure this is ever actually used) -->
+  <Target Name="FixNativeAssets_Publish" AfterTargets="CopyFilesToPublishDirectory">
+    <Message Importance="High" Text="Replacing StereoKit native Windows assets with UWP versions (publish)" />
+    <Copy SourceFiles="$(OutputPath)StereoKitC.dll" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Ensure UWP native assets end up in package map file (this controls what ends up in the package when packing from VS, which is what matters) -->
+  <Target Name="FixNativeAssets_Package" BeforeTargets="_GenerateAppxPackageFile">
+    <ItemGroup>
+      <AppxPackagePayload Remove="$(NuGetPackageRoot)stereokit\0.3.9\runtimes\win-$(Platform)\native\StereoKitC.dll"/>
+      <AppxPackagePayload Include="$(NuGetPackageRoot)stereokit\0.3.9\runtimes\win10-$(Platform)\nativeassets\uap10.0\StereoKitC.dll">
+        <TargetPath>StereoKitC.dll</TargetPath>
+      </AppxPackagePayload>
+    </ItemGroup>
+    <Message Importance="High" Text="Replacing StereoKit native Windows assets with UWP versions (package)" />
+  </Target>
+</Project>

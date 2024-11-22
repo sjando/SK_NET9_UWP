@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows10.0.22621.0</TargetFramework>
+    <DefaultLanguage>en</DefaultLanguage>
+    <ImplicitUsings>true</ImplicitUsings>
+    <UseUwp>true</UseUwp>
+    <Platforms>x64;arm64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <PublishAot>true</PublishAot>
+    <PublishProfile>win-$(Platform).pubxml</PublishProfile>
+    <DisableRuntimeMarshalling>true</DisableRuntimeMarshalling>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <EnableXamlCompilerTargetsForUwpApps>false</EnableXamlCompilerTargetsForUwpApps>
+    <AppxPackageDir>artifacts/packages</AppxPackageDir>
+    <!-- SK asset copying can conflict with what appears to be VS special handling of Assets folder -->
+    <SKAssetFolder>SKAssets</SKAssetFolder>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="StereoKit" Version="0.3.9" />
+  </ItemGroup>
+  <!-- Ensure we get the UWP rather than Win32 versions of StereoKit native libs in all the right places -->
+  <Import Project="SKNativeAssetFixes.targets" />
+</Project>
